@@ -4,7 +4,6 @@ import { bookRequestSchema, bookSchema, librarySchema, userSchema } from "./sche
 const BookModel = mongoose.model('Book', bookSchema);
 const BookRequestModel = mongoose.model('BookRequest', bookRequestSchema);
 const UserModel = mongoose.model('User', userSchema);
-// const LibrarianModel = mongoose.model('Librarian', librarianSchema);
 const LibraryModel = mongoose.model('Library', librarySchema);
 
 export { BookModel, BookRequestModel, UserModel, LibraryModel };

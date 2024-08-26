@@ -2,6 +2,13 @@ import mongoose, { ConnectOptions } from "mongoose";
 import { IDbClient } from "../../types";
 
 export class MongooseClient implements IDbClient {
+
+    constructor() {
+        mongoose.connection.on('disconnect', () => {
+            console.log('MongoDB Disconnected Successfully!');
+        });
+    }
+
     connect = async () => {
         try {
         const conn = await mongoose.connect(process.env.MONGO_URI as string);
@@ -12,4 +19,8 @@ export class MongooseClient implements IDbClient {
             process.exit(1); // Exit process with failure
         }
     };
+
+    disconnect = async () => {
+        await mongoose.disconnect();
+    }
 };
