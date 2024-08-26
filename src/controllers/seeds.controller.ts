@@ -5,6 +5,12 @@ import { bookRequestSeedData, bookSeedData, librarySeedData, userSeedData } from
 // Mongoose specific
 export class SeedsController {
     async create(_req: Request, res: Response) {
+        await Promise.all([
+            BookModel.deleteMany({}),
+            UserModel.deleteMany({}),
+            BookRequestModel.deleteMany({}),
+            LibraryModel.deleteMany({})
+        ]);
         await BookModel.insertMany(bookSeedData);
         await UserModel.insertMany(userSeedData);
         await BookRequestModel.insertMany(bookRequestSeedData);

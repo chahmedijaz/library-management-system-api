@@ -4,29 +4,35 @@ import { MongooseClient } from "./lib/mongoose/mongoose-client";
 import { configDotenv } from "dotenv";
 import { IDbClient } from "./types";
 import { SeedsController } from "./controllers";
+import { AuthRoutes } from "./routes";
 
 // Load all the env variables
 configDotenv();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 const requestLogger = new RequestLogger();
 
 const mongooseClient: IDbClient = new MongooseClient();
 mongooseClient.connect();
 
+// use middlewares
 app.use(requestLogger.log);
+app.use(express.json());
+express.urlencoded({ extended: true })
 
 const seedController = new SeedsController();
 app.get('/seed-db', seedController.create);
+
+app.use(AuthRoutes);
 
 app.get('/health-check', (req, res) => {
     res.send(`Health OK`);
 });
 
 
-app.listen(port, () => {
-    console.log(`Starting server at port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Starting server at port ${PORT}`);
 });
 
 
