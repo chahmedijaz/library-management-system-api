@@ -4,8 +4,10 @@ import { MongooseClient } from "./lib/mongoose/mongoose-client";
 import { configDotenv } from "dotenv";
 import { IDbClient } from "./types";
 import { SeedsController } from "./controllers";
-import { AuthRoutes, BookRoutes } from "./routes";
+import { AuthRoutes, BookRoutes, LibraryRoutes } from "./routes";
 import { ProtectedRoutesMiddleware } from "./middlewares/protected-routes.middleware";
+import { BookRequestRoutes } from "./routes/book-request.routes";
+import { UserRoutes } from "./routes/member.routes";
 
 // Load all the env variables
 configDotenv();
@@ -31,6 +33,9 @@ app.get('/seed-db', seedController.create);
 
 app.use(AuthRoutes);
 app.use('/books', BookRoutes);
+app.use('/libraries', LibraryRoutes);
+app.use('/requests', BookRequestRoutes);
+app.use('/users', UserRoutes);
 
 app.get('/health-check', (req, res) => {
     res.send(`Health OK`);

@@ -5,6 +5,7 @@ const PUBLIC_ROUTES = [
     '/login',
     '/signup',
     '/logout',
+    '/seed-db'
 ];
 
 export class ProtectedRoutesMiddleware {
