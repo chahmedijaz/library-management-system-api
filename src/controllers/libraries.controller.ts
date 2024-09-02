@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { SessionStorage } from "../entities";
-import { BookModel, LibraryModel } from "../lib/mongoose/models";
+import { BookModel, LibraryModel, UserModel } from "../lib/mongoose/models";
+import { Types } from "mongoose";
 
 export class LibrariesController extends BaseController {
     /**
@@ -31,8 +32,17 @@ export class LibrariesController extends BaseController {
         const { name } = req.body;
 
         try {
-            const newLibrary = new LibraryModel({ name, books: [], users: [] });
+            const librarian = new UserModel({
+                _id: new Types.ObjectId(),
+                name: 'Librarian',
+                email: `${(name as string).toLowerCase().replace(' ', '_')}@lib.com`,
+                password: 'admin123',
+                role: 'librarian',
+                bookRequests: []
+            });
+            const newLibrary = new LibraryModel({ name, books: [], users: [librarian] });
             await newLibrary.save();
+            await librarian.save();
 
             res.status(201).json(newLibrary);
         } catch (error) {

@@ -7,10 +7,12 @@ export class BookRequestsController extends BaseController {
      * index
      */
     public async index(req: Request, res: Response) {
-        const { page = 1, pageSize = 10, status } = req.query;
+        const { page = 1, pageSize = 10, status, bookId, memberId } = req.query;
 
-        const whereParams: {status?: string} = {};
+        const whereParams: {status?: string, bookId?: string, memberId?: string} = {};
         if (status) whereParams.status = status as string;
+        if (bookId) whereParams.bookId = bookId as string;
+        if (memberId) whereParams.memberId = memberId as string;
 
         try {
             const bookRequests = await BookRequestModel.where(whereParams)

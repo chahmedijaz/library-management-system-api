@@ -9,24 +9,59 @@ export class BooksController extends BaseController {
      */
     public async index(req: Request, res: Response) {
         const currentLibrary: any = SessionStorage.sessionLibrary(req);
-        const { page, pageSize } = req.query;
+        const { page = 1, pageSize = 10, searchParam } = req.query;
+        
         try {
-            const library = (await LibraryModel.findOne(currentLibrary._id).populate('books').exec());
+            // Validate library
+            const library = await LibraryModel.findOne({ _id: currentLibrary._id });
             if (!library) {
-                return res.status(404).json({ message: 'Books not found' });
+                return res.status(404).json({ message: 'Library not found' });
             }
+    
+            // Build the match query for search
+            const matchQuery = searchParam ? { title: new RegExp((searchParam as string), 'i') } : {};
+    
+            // Fetch books with pagination using skip and limit for efficiency
+            const booksQuery = LibraryModel.aggregate([
+                { $match: { _id: library._id } },
+                { $unwind: "$books" },
+                { $lookup: {
+                    from: "books",
+                    localField: "books",
+                    foreignField: "_id",
+                    as: "bookDetails"
+                }},
+                { $match: { "bookDetails.title": matchQuery.title || { $exists: true } }},
+                { $skip: (Number(page) - 1) * Number(pageSize) },
+                { $limit: Number(pageSize) },
+                { $replaceRoot: { newRoot: { $arrayElemAt: ["$bookDetails", 0] } }}
+            ]);
 
-            const total = library.books.length;
-            const startIndex = (Number(page) - 1) * Number(pageSize);
-            const endIndex = startIndex + Number(pageSize);
-            const paginatedBooks = library.books.slice(
-                startIndex, 
-                endIndex
-            );
+            const libraryBooksCountQuery = LibraryModel.aggregate([
+                { $match: { _id: library._id } },
+                { $unwind: "$books" },
+                { $lookup: {
+                    from: "books",
+                    localField: "books",
+                    foreignField: "_id",
+                    as: "bookDetails"
+                }},
+                { $unwind: "$bookDetails" },
+                { $match: { "bookDetails.title": matchQuery.title || { $exists: true } }},
+                { $count: "totalBooks" }
+              ]);
+    
+            const [books, libraryBooksCount] = await Promise.all([
+                booksQuery,
+                libraryBooksCountQuery
+            ]);
 
-            res.status(200).json({total, books: paginatedBooks});
+            const totalBooks = libraryBooksCount.length > 0 ? libraryBooksCount[0].totalBooks : 0;
+
+    
+            res.status(200).json({ total: totalBooks, books });
         } catch (error) {
-            res.status(500).json({error});
+            res.status(500).json({ error });
         }
     }
 
