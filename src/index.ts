@@ -8,6 +8,7 @@ import { AuthRoutes, BookRoutes, LibraryRoutes } from "./routes";
 import { ProtectedRoutesMiddleware } from "./middlewares/protected-routes.middleware";
 import { BookRequestRoutes } from "./routes/book-request.routes";
 import { UserRoutes } from "./routes/member.routes";
+import cors from "cors";
 
 // Load all the env variables
 configDotenv();
@@ -22,6 +23,7 @@ mongooseClient.connect();
 // use middlewares
 app.use(requestLogger.log);
 app.use(express.json());
+app.use(cors());
 express.urlencoded({ extended: true })
 
 // Protect routes
