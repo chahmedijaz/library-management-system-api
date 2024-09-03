@@ -25,6 +25,9 @@ export class AuthController {
 
             res.send({
                 sessionId,
+                library: {
+                    name: library?.name
+                }
             });
         }
         else {
